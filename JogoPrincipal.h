@@ -165,53 +165,69 @@ public:
         }
     }
 
-    void desenharHUD() {
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-        gluOrtho2D(0.0, LARGURA_JANELA, 0.0, ALTURA_JANELA);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
+void desenharHUD() {
 
-        glColor3f(1.0f, 1.0f, 1.0f);
-        char buffer[50];
-        sprintf(buffer, "Score: %d", pontuacao);
-        desenharTexto(10, ALTURA_JANELA - 20, buffer);
-        // Desenha o contador de vidas como sprites
-        float startX = LARGURA_JANELA - 150;
-        float startY = ALTURA_JANELA - 20;
-        float spriteSize = 30.0f; // Tamanho do sprite de vida (Aumentado)
-        float spacing = 5.0f; // Espaçamento entre os sprites
-        
-        glEnable(GL_TEXTURE_2D);
-        glBindTexture(GL_TEXTURE_2D, vidaTextureID);
-        glColor3f(1.0f, 1.0f, 1.0f); // Cor branca para não colorir a textura
-        
-        for (int i = 0; i < player->vidas; ++i) {
-            glPushMatrix();
-            glTranslatef(startX + i * (spriteSize + spacing), startY, 0);
-            
-            glBegin(GL_QUADS);
-                glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, 0.0f);
-                glTexCoord2f(1.0f, 1.0f); glVertex2f(spriteSize, 0.0f);
-                glTexCoord2f(1.0f, 0.0f); glVertex2f(spriteSize, spriteSize);
-                glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, spriteSize);
-            glEnd();
-            
-            glPopMatrix();
-        }
-        
-        glDisable(GL_TEXTURE_2D);
-        
-        // Desenha o texto "Vidas:"
-        desenharTexto(LARGURA_JANELA - 230, ALTURA_JANELA - 15, "Vidas:");
+    // ----- DESLIGA O DEPTH TEST PARA O HUD FICAR NA FRENTE -----
+    glDisable(GL_DEPTH_TEST);
 
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
+    // Projeção ortográfica
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0.0, LARGURA_JANELA, 0.0, ALTURA_JANELA);
+
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    // --- SCORE ---
+    glColor3f(1.0f, 1.0f, 1.0f);
+    char buffer[50];
+    sprintf(buffer, "Score: %d", pontuacao);
+    desenharTexto(10, ALTURA_JANELA - 25, buffer);
+
+    // --- TEXTO VIDAS ---
+    float textoVidasX = 10.0f;
+    float textoVidasY = ALTURA_JANELA - 55.0f;
+    desenharTexto(textoVidasX, textoVidasY, "Vidas:");
+
+    // --- ÍCONES DE VIDA ---
+    float spriteSize = 40.0f;
+    float spacing = 6.0f;
+
+    float inicioVidasX = textoVidasX + 70.0f;
+    float inicioVidasY = textoVidasY - 20.0f;
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, vidaTextureID);
+    glColor3f(1,1,1);
+
+    for (int i = 0; i < player->vidas; ++i) {
+
+        glPushMatrix();
+        glTranslatef(inicioVidasX + i * (spriteSize + spacing), inicioVidasY, 0);
+
+        glBegin(GL_QUADS);
+            glTexCoord2f(0,1); glVertex2f(0,0);
+            glTexCoord2f(1,1); glVertex2f(spriteSize,0);
+            glTexCoord2f(1,0); glVertex2f(spriteSize,spriteSize);
+            glTexCoord2f(0,0); glVertex2f(0,spriteSize);
+        glEnd();
+
         glPopMatrix();
     }
+
+    glDisable(GL_TEXTURE_2D);
+
+    // Restaurar matrizes
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+
+    // ----- REATIVA O DEPTH TEST PARA O JOGO NORMAL -----
+    glEnable(GL_DEPTH_TEST);
+}
 
     void desenharTelaFim() {
         glMatrixMode(GL_PROJECTION);
