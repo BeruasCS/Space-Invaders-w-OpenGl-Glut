@@ -8,6 +8,7 @@
 #include <vector>
 #include <stdio.h>
 #include <GL/glut.h>
+#include "TextureLoader.h" // Adicionado para carregar a textura de vida
 
 enum EstadoJogo {
     JOGANDO,
@@ -17,6 +18,9 @@ enum EstadoJogo {
 
 // Antiga classe Game
 class JogoPrincipal {
+private:
+    GLuint vidaTextureID; // Adicionado para a textura de vida
+public:
 public:
     Player* player;
     Enxame* enxame;
@@ -29,7 +33,8 @@ public:
     bool teclasEspeciais[256];
     int contadorFramesTiroAlien;
 
-    JogoPrincipal() : player(nullptr), enxame(nullptr), estado(JOGANDO), pontuacao(0), contadorFramesTiroAlien(0) {
+    JogoPrincipal() : player(nullptr), enxame(nullptr), estado(JOGANDO), pontuacao(0), contadorFramesTiroAlien(0),
+                   vidaTextureID(loadTexture("sprites/vida.png")) {
         for (int i = 0; i < 256; i++) {
             teclas[i] = false;
             teclasEspeciais[i] = false;
@@ -50,6 +55,8 @@ public:
         projeteis.clear();
 
         player = new Player(PLAYER_START_X, PLAYER_START_Y);
+        vidaTextureID = loadTexture("sprites/vida.png"); // Recarrega a textura ao reiniciar o jogo, se necessário.
+
         enxame = new Enxame();
         enxame->init(ENXAME_LINHAS, ENXAME_COLUNAS);
         
@@ -171,8 +178,34 @@ public:
         char buffer[50];
         sprintf(buffer, "Score: %d", pontuacao);
         desenharTexto(10, ALTURA_JANELA - 20, buffer);
-        sprintf(buffer, "Vidas: %d", player->vidas > 0 ? player->vidas : 0); 
-        desenharTexto(LARGURA_JANELA - 100, ALTURA_JANELA - 20, buffer);
+        // Desenha o contador de vidas como sprites
+        float startX = LARGURA_JANELA - 150;
+        float startY = ALTURA_JANELA - 20;
+        float spriteSize = 30.0f; // Tamanho do sprite de vida (Aumentado)
+        float spacing = 5.0f; // Espaçamento entre os sprites
+        
+        glEnable(GL_TEXTURE_2D);
+        glBindTexture(GL_TEXTURE_2D, vidaTextureID);
+        glColor3f(1.0f, 1.0f, 1.0f); // Cor branca para não colorir a textura
+        
+        for (int i = 0; i < player->vidas; ++i) {
+            glPushMatrix();
+            glTranslatef(startX + i * (spriteSize + spacing), startY, 0);
+            
+            glBegin(GL_QUADS);
+                glTexCoord2f(0.0f, 1.0f); glVertex2f(0.0f, 0.0f);
+                glTexCoord2f(1.0f, 1.0f); glVertex2f(spriteSize, 0.0f);
+                glTexCoord2f(1.0f, 0.0f); glVertex2f(spriteSize, spriteSize);
+                glTexCoord2f(0.0f, 0.0f); glVertex2f(0.0f, spriteSize);
+            glEnd();
+            
+            glPopMatrix();
+        }
+        
+        glDisable(GL_TEXTURE_2D);
+        
+        // Desenha o texto "Vidas:"
+        desenharTexto(LARGURA_JANELA - 230, ALTURA_JANELA - 15, "Vidas:");
 
         glMatrixMode(GL_PROJECTION);
         glPopMatrix();
