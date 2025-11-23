@@ -33,13 +33,19 @@ public:
     bool teclasEspeciais[256];
     int contadorFramesTiroAlien;
 
-    JogoPrincipal() : player(nullptr), enxame(nullptr), estado(JOGANDO), pontuacao(0), contadorFramesTiroAlien(0),
-                   vidaTextureID(loadTexture("sprites/vida.png")) {
-        for (int i = 0; i < 256; i++) {
-            teclas[i] = false;
-            teclasEspeciais[i] = false;
-        }
+JogoPrincipal()
+    : vidaTextureID(loadTexture("sprites/vida.png")),   // 1º — está em primeiro no .h
+      player(nullptr),                                   // 2º
+      enxame(nullptr),                                   // 3º
+      estado(JOGANDO),                                   // 4º
+      pontuacao(0),                                      // 5º
+      contadorFramesTiroAlien(0)                         // 6º (último dos inicializáveis)
+{
+    for (int i = 0; i < 256; i++) {
+        teclas[i] = false;
+        teclasEspeciais[i] = false;
     }
+}
 
     ~JogoPrincipal() {
         delete player;
